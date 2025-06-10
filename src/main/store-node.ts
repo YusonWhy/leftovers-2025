@@ -8,6 +8,54 @@ import { powerMonitor } from 'electron'
 import sanitizeFilename from 'sanitize-filename'
 import { getLogger } from './util'
 
+// 检测是否为便携式版本  
+// const isPortable = process.env.PORTABLE_EXECUTABLE_DIR !== undefined  
+// const userDataPath = isPortable   
+//   ? path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'data')  
+//   : app.getPath('userData')  
+  
+// app.setPath('userData', userDataPath)
+
+// 检测是否为便携式版本，共享数据目录为 __data 并设置隐藏
+const isPortable = process.env.PORTABLE_EXECUTABLE_DIR !== undefined ||   
+                   process.platform === 'darwin' && process.env.PORTABLE_APP_DIR !== undefined  
+  
+let userDataPath: string  
+if (isPortable) {  
+  if (process.platform === 'win32') {  
+    userDataPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR!, '.__data')  
+  } else if (process.platform === 'darwin') {  
+    // Mac便携式版本的数据路径  
+    userDataPath = path.join(path.dirname(process.execPath), '..', '.__data')  
+  } else {  
+    userDataPath = app.getPath('userData')  
+  }  
+} else {  
+  userDataPath = app.getPath('userData')  
+}  
+  
+app.setPath('userData', userDataPath)
+
+// 在设置用户数据路径后，确保目录存在并设置隐藏属性  
+if (isPortable) {  
+  const fs = require('fs-extra')  
+    
+  // 确保目录存在  
+  await fs.ensureDir(userDataPath)  
+    
+  // Windows下设置隐藏属性  
+  if (process.platform === 'win32') {  
+    try {  
+      const { exec } = require('child_process')  
+      exec(`attrib +h "${userDataPath}"`)  
+    } catch (error) {  
+      console.warn('Failed to set hidden attribute:', error)  
+    }  
+  }
+}
+
+
+
 const logger = getLogger('store-node')
 
 const configPath = path.resolve(app.getPath('userData'), 'config.json')

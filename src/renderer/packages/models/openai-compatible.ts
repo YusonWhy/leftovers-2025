@@ -1,14 +1,13 @@
 import { apiRequest, fetchWithProxy } from '@/utils/request'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import AbstractAISDKModel from './abstract-ai-sdk'
-import { ApiError } from './errors'
 import { ModelInterface } from './types'
-import { ProviderModelInfo } from 'src/shared/types'
+import { ApiError } from './errors'
 
 interface OpenAICompatibleSettings {
   apiKey: string
   apiHost: string
-  model: ProviderModelInfo
+  model: string
   temperature?: number
   topP?: number
   useProxy?: boolean
@@ -18,7 +17,7 @@ export default abstract class OpenAICompatible extends AbstractAISDKModel implem
   public name = 'OpenAI Compatible'
 
   constructor(private settings: OpenAICompatibleSettings) {
-    super(settings)
+    super()
   }
 
   protected getCallSettings() {
@@ -35,8 +34,10 @@ export default abstract class OpenAICompatible extends AbstractAISDKModel implem
       baseURL: this.settings.apiHost,
       fetch: this.settings.useProxy ? fetchWithProxy : undefined,
     })
-    return provider.languageModel(this.settings.model.modelId)
+    return provider.languageModel(this.settings.model)
   }
+
+  public abstract isSupportToolUse(): boolean
 
   public async listModels(): Promise<string[]> {
     return fetchRemoteModels({

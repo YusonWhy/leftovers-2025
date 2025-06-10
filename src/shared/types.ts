@@ -1,5 +1,8 @@
+import { GeminiModel } from '@/packages/models/gemini'
 import { LanguageModelUsage } from 'ai'
+import pick from 'lodash/pick'
 import { v4 as uuidv4 } from 'uuid'
+import { OpenAIModel } from '../renderer/packages/models/openai'
 
 export interface SearchResultItem {
   title: string
@@ -126,40 +129,6 @@ export function isPictureSession(session: Session) {
   return session.type === 'picture'
 }
 
-type ClaudeParams = {
-  thinking: {
-    type: 'enabled' | 'disabled'
-    budgetTokens: number
-  }
-}
-
-type OpenAIParams = {
-  reasoningEffort: 'low' | 'medium' | 'high' | null
-}
-
-type GoogleParams = {
-  thinkingConfig: {
-    thinkingBudget: number
-    includeThoughts: boolean
-  }
-}
-export type ProviderOptions = {
-  claude?: Partial<ClaudeParams>
-  openai?: Partial<OpenAIParams>
-  google?: Partial<GoogleParams>
-}
-
-export type SessionSettings = Partial<{
-  provider: ModelProvider
-  modelId: string
-  maxContextMessageCount: number
-  temperature: number
-  topP: number
-  dalleStyle: 'vivid' | 'natural'
-  imageGenerateNum: number // 生成图片的数量
-  providerOptions?: ProviderOptions
-}>
-
 export interface Session {
   id: string
   type?: SessionType // undefined 为了兼容老版本 chat
@@ -169,7 +138,7 @@ export interface Session {
   starred?: boolean
   copilotId?: string
   assistantAvatarKey?: string // 助手头像的 key
-  settings?: SessionSettings // 会话设置
+  settings?: Partial<ReturnType<typeof settings2SessionSettings>>
   threads?: SessionThread[] // 历史话题列表
   threadName?: string // 当前话题名称
   messageForksHash?: Record<
@@ -204,6 +173,56 @@ export interface SessionThreadBrief {
   messageCount: number
 }
 
+export function settings2SessionSettings(settings: ModelSettings) {
+  return pick(settings, [
+    'aiProvider',
+
+    'chatboxAIModel',
+    'openaiMaxContextMessageCount',
+    'maxContextMessageCount',
+    'temperature',
+    'topP',
+    'dalleStyle',
+    'imageGenerateNum',
+
+    'model',
+    'openaiCustomModel',
+    // 'openaiMaxContextTokens',
+    // 'openaiMaxTokens',
+
+    'azureDeploymentName',
+    'azureDalleDeploymentName',
+
+    'chatglmModel',
+
+    'claudeModel',
+
+    'ollamaHost',
+    'ollamaModel',
+
+    'geminiModel',
+
+    'groqModel',
+
+    'deepseekModel',
+
+    'siliconCloudModel',
+
+    'lmStudioModel',
+
+    'perplexityModel',
+
+    'xAIModel',
+
+    'selectedCustomProviderId',
+    'customProviders',
+  ])
+}
+
+export function pickPictureSettings(settings: ModelSettings) {
+  return pick(settings, ['dalleStyle', 'imageGenerateNum'])
+}
+
 export function createMessage(role: MessageRole = MessageRoleEnum.User, content: string = ''): Message {
   return {
     id: uuidv4(),
@@ -214,7 +233,8 @@ export function createMessage(role: MessageRole = MessageRoleEnum.User, content:
 }
 
 export enum ModelProvider {
-  ChatboxAI = 'chatbox-ai',
+  SiliconFlow = 'siliconflow',
+  //ChatboxAI = 'chatbox-ai',
   OpenAI = 'openai',
   Azure = 'azure',
   ChatGLM6B = 'chatglm-6b',
@@ -223,62 +243,97 @@ export enum ModelProvider {
   Ollama = 'ollama',
   Groq = 'groq',
   DeepSeek = 'deepseek',
-  SiliconFlow = 'siliconflow',
   LMStudio = 'lm-studio',
   Perplexity = 'perplexity',
   XAI = 'xAI',
   Custom = 'custom',
 }
 
-export type ProviderModelInfo = {
-  modelId: string
-  nickname?: string
-  labels?: string[]
-  capabilities?: ('vision' | 'reasoning' | 'tool_use')[]
-  contextWindow?: number
-  maxOutput?: number
-}
+export interface ModelSettings {
+  aiProvider: ModelProvider // 当前应用中使用的provider（虽然可以配很多，但实际同时只能使用一个）
 
-export type ProviderBaseInfo = {
-  id: ModelProvider
-  name: string
-  type: ModelProviderType
-  isCustom?: false
-  urls?: {
-    website?: string
-    apiKey?: string
-    docs?: string
-    models?: string
-  }
-  defaultSettings?: ProviderSettings
-}
-
-export type CustomProviderBaseInfo = Omit<ProviderBaseInfo, 'id' | 'isCustom'> & {
-  id: string
-  isCustom: true
-}
-
-export type ProviderSettings = Partial<{
+  // openai
+  openaiKey: string
   apiHost: string
-  apiPath: string
-  apiKey: string
-  models: ProviderModelInfo[]
-  baseDefaultModels: ProviderModelInfo[]
-  excludedModels: string[] // chatbox ai记录被移除的模型id
+  model: OpenAIModel | 'custom-model'
+  openaiCustomModel?: string // OpenAI 自定义模型的 ID
+  openaiCustomModelOptions: string[]
+  openaiUseProxy: boolean
+
+  dalleStyle: 'vivid' | 'natural'
+  imageGenerateNum: number // 生成图片的数量
+
   // azure
-  endpoint: string
-  deploymentName: string
-  dalleDeploymentName: string // dall-e-3 的部署名称
-  apiVersion: string
-  useProxy: boolean // 目前只有custom provider会使用这个字段
-}>
+  azureEndpoint: string
+  azureDeploymentName: string
+  azureDeploymentNameOptions: string[]
+  azureDalleDeploymentName: string // dall-e-3 的部署名称
+  azureApikey: string
+  azureApiVersion: string
 
-export type ProviderInfo = (ProviderBaseInfo | CustomProviderBaseInfo) & ProviderSettings
+  // chatglm
+  chatglm6bUrl: string // deprecated
+  chatglmApiKey: string
+  chatglmModel: string
 
-export enum ModelProviderType {
-  ChatboxAI = 'chatbox-ai',
-  OpenAI = 'openai',
-  Gemini = 'gemini',
+  // chatbox-ai
+  licenseKey?: string
+  chatboxAIModel: ChatboxAIModel
+  licenseInstances?: {
+    [key: string]: string
+  }
+  licenseDetail?: ChatboxAILicenseDetail
+
+  // claude
+  claudeApiKey: string
+  claudeApiHost: string
+  claudeModel: string
+
+  // google gemini
+  geminiAPIKey: string
+  geminiAPIHost: string
+  geminiModel: GeminiModel
+
+  // ollama
+  ollamaHost: string
+  ollamaModel: string
+
+  // groq
+  groqAPIKey: string
+  groqModel: string
+
+  // deepseek
+  deepseekAPIKey: string
+  deepseekModel: string
+
+  // siliconflow
+  siliconCloudKey: string
+  siliconCloudModel: string
+
+  // LMStudio
+  lmStudioHost: string
+  lmStudioModel: string
+
+  // perplexity
+  perplexityApiKey: string
+  perplexityModel: string
+
+  // xai
+  xAIKey: string
+  xAIModel: string
+
+  // custom provider
+  selectedCustomProviderId?: string // 选中的自定义提供者 ID，仅当 aiProvider 为 custom 时有效
+  customProviders: CustomProvider[]
+
+  temperature: number // 0-2
+  topP: number // 0-1
+  // openaiMaxTokens: number // 生成消息的最大限制，是传入 OpenAI 接口的参数。0 代表不限制（不传递）
+  // openaiMaxContextTokens: number // 聊天消息上下文的tokens限制。
+  openaiMaxContextMessageCount: number // 聊天消息上下文的消息数量限制。超过20表示不限制
+  maxContextMessageCount?: number
+  // maxContextSize: string 弃用，字段名永远不在使用，避免老版本报错
+  // maxTokens: string 弃用，字段名永远不在使用，避免老版本报错
 }
 
 export type ModelMeta = {
@@ -305,40 +360,12 @@ export interface CustomProvider {
 
 export interface ExtensionSettings {
   webSearch: {
-    provider: 'build-in' | 'bing' | 'tavily' // 搜索提供方
+    provider: 'baidu' | 'bing' | 'tavily' // 搜索提供方
     tavilyApiKey?: string // Tavily API 密钥
   }
 }
 
-export interface Settings extends SessionSettings {
-  providers?: {
-    [key: string]: ProviderSettings
-  }
-
-  customProviders?: CustomProviderBaseInfo[]
-
-  favoritedModels?: {
-    provider: ModelProvider | string
-    model: string
-  }[]
-
-  // default models
-  threadNamingModel?: {
-    provider: ModelProvider | string
-    model: string
-  }
-  searchTermConstructionModel?: {
-    provider: ModelProvider | string
-    model: string
-  }
-
-  // chatboxai
-  licenseKey?: string
-  licenseInstances?: {
-    [key: string]: string
-  }
-  licenseDetail?: ChatboxAILicenseDetail
-
+export interface Settings extends ModelSettings {
   showWordCount?: boolean
   showTokenCount?: boolean
   showTokenUsed?: boolean

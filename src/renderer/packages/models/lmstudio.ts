@@ -1,24 +1,54 @@
+import { ModelHelpers } from './types'
 import OpenAICompatible from './openai-compatible'
-import { normalizeOpenAIApiHostAndPath } from './llm_utils'
-import { ProviderModelInfo } from 'src/shared/types'
+
+const helpers: ModelHelpers = {
+  isModelSupportVision: (model: string) => {
+    model = model.toLowerCase()
+    return model.includes('vision') || model.includes('llava')
+  },
+  isModelSupportToolUse: (model: string) => {
+    return false
+  },
+}
 
 interface Options {
   lmStudioHost: string
-  model: ProviderModelInfo
+  lmStudioModel: string
   temperature?: number
   topP?: number
 }
 
 export default class LMStudio extends OpenAICompatible {
   public name = 'LM Studio'
+  public static helpers = helpers
 
   constructor(public options: Options) {
     super({
       apiKey: '',
-      apiHost: normalizeOpenAIApiHostAndPath({ apiHost: options.lmStudioHost }).apiHost,
-      model: options.model,
+      apiHost: normalizeApiHost(options.lmStudioHost),
+      model: options.lmStudioModel,
       temperature: options.temperature,
       topP: options.topP,
     })
   }
+
+  isSupportToolUse() {
+    return helpers.isModelSupportToolUse(this.options.lmStudioModel)
+  }
+}
+
+function normalizeApiHost(apiHost: string) {
+  if (apiHost) {
+    apiHost = apiHost.trim()
+  }
+  if (!apiHost.startsWith('http')) {
+    apiHost = 'http://' + apiHost
+  }
+  if (apiHost.endsWith('/')) {
+    apiHost = apiHost.slice(0, -1)
+  }
+  if (!apiHost.endsWith('/v1')) {
+    apiHost += '/v1'
+  }
+  return apiHost
 }

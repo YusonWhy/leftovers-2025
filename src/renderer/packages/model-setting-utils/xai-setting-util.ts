@@ -1,20 +1,47 @@
-import { ModelProvider, ProviderSettings, SessionType } from 'src/shared/types'
+import { ModelSettings, Session, SessionType, Settings } from 'src/shared/types'
 import { ModelSettingUtil } from './interface'
 import BaseConfig from './base-config'
-import XAI from '../models/xai'
+import XAI, { xAIModels } from '../models/xai'
 
 export default class XAISettingUtil extends BaseConfig implements ModelSettingUtil {
-  public provider: ModelProvider = ModelProvider.XAI
-  async getCurrentModelDisplayName(
-    model: string,
-    sessionType: SessionType,
-    providerSettings?: ProviderSettings
-  ): Promise<string> {
-    return `xAI API (${providerSettings?.models?.find((m) => m.modelId === model)?.nickname || model})`
+  async getCurrentModelDisplayName(settings: Settings, sessionType: SessionType): Promise<string> {
+    return `xAI API (${settings.xAIModel})`
   }
 
-  protected async listProviderModels(settings: ProviderSettings) {
-    const xai = new XAI({ xAIKey: settings.apiKey!, model: { modelId: '', capabilities: [] } })
+  getCurrentModelOptionValue(settings: Settings) {
+    return settings.xAIModel
+  }
+
+  public getLocalOptionGroups(settings: ModelSettings) {
+    return [
+      {
+        options: xAIModels.map((value) => {
+          return {
+            label: value,
+            value: value,
+          }
+        }),
+      },
+    ]
+  }
+
+  protected async listProviderModels(settings: ModelSettings) {
+    const xai = new XAI(settings)
     return xai.listModels()
+  }
+
+  selectSessionModel(settings: Session['settings'], selected: string): Session['settings'] {
+    return {
+      ...settings,
+      xAIModel: selected,
+    }
+  }
+
+  isCurrentModelSupportImageInput(settings: ModelSettings): boolean {
+    return XAI.helpers.isModelSupportVision(settings.xAIModel)
+  }
+
+  isCurrentModelSupportToolUse(settings: ModelSettings): boolean {
+    return XAI.helpers.isModelSupportToolUse(settings.xAIModel)
   }
 }

@@ -1,0 +1,44 @@
+name: Build Cross Platform Portable  
+  
+on:  
+  workflow_dispatch:  
+  
+jobs:  
+  build:  
+    strategy:  
+      matrix:  
+        os: [windows-latest, macos-latest]  
+          
+    runs-on: ${{ matrix.os }}  
+      
+    steps:  
+    - uses: actions/checkout@v4  
+    - uses: actions/setup-node@v4  
+      with:  
+        node-version: '18'  
+        cache: 'npm'  
+          
+    - run: npm install  
+    - run: npm run build  
+      
+    - name: Package portable for Windows  
+      if: matrix.os == 'windows-latest'  
+      run: npx electron-builder --win portable  
+        
+    - name: Package portable for macOS  
+      if: matrix.os == 'macos-latest'  
+      run: npx electron-builder --mac zip  
+      
+    - name: Upload Windows artifacts  
+      if: matrix.os == 'windows-latest'  
+      uses: actions/upload-artifact@v4  
+      with:  
+        name: chatbox-windows-portable  
+        path: release/build/*.exe  
+          
+    - name: Upload macOS artifacts  
+      if: matrix.os == 'macos-latest'  
+      uses: actions/upload-artifact@v4  
+      with:  
+        name: chatbox-macos-portable  
+        path: release/build/*.zip

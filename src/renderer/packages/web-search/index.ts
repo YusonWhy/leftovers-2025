@@ -1,6 +1,7 @@
 import { cachified } from '@epic-web/cachified'
 import { truncate } from 'lodash'
 import type { SearchResultItem } from './base'
+import { BaiduSearch } from './baidu'
 import { BingNewsSearch } from './bing-news'
 import { BingSearch } from './bing'
 import { TavilySearch } from './tavily'
@@ -21,14 +22,8 @@ function getSearchProviders() {
   const language = getLanguage()
 
   switch (provider) {
-    case 'build-in':
-      if (!licenseKey) {
-        throw ChatboxAIAPIError.fromCodeName(
-          'chatbox_search_license_key_required',
-          'chatbox_search_license_key_required'
-        )
-      }
-      selectedProviders.push(new ChatboxSearch(licenseKey))
+    case 'baidu':  
+      selectedProviders.push(new BaiduSearch())  
       break
     case 'bing':
       selectedProviders.push(new BingSearch())

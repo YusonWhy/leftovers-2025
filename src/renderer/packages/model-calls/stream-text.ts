@@ -1,5 +1,5 @@
-import uniqueId from 'lodash/uniqueId'
-import { Message, MessageToolCallPart, ProviderOptions, StreamTextResult } from '../../../shared/types'
+import { uniqueId } from 'lodash'
+import { Message, MessageToolCallPart, StreamTextResult } from '../../../shared/types'
 import { ModelInterface, OnResultChange, onResultChangeWithCancel } from '../models/types'
 import { constructMessagesWithSearchResults, searchByPromptEngineering, webSearchTool } from './tools'
 
@@ -9,7 +9,6 @@ export async function streamText(
     messages: Message[]
     onResultChangeWithCancel: onResultChangeWithCancel
     webBrowsing?: boolean
-    providerOptions?: ProviderOptions
   }
 ) {
   const controller = new AbortController()
@@ -27,7 +26,7 @@ export async function streamText(
     }
 
     // 不支持工具调用的模型，则使用prompt engineering的方式进行联网搜索
-    if (params.webBrowsing && (!model.isSupportToolUse('web-browsing'))) {
+    if (params.webBrowsing && !model.isSupportToolUse()) {
       const callResult = await searchByPromptEngineering(model, params.messages, controller.signal)
       // 模型判断不需要搜索，或没有搜索结果，让模型正常回答
       if (!callResult?.searchResults?.length) {
@@ -51,7 +50,6 @@ export async function streamText(
             onResultChange(data)
           }
         },
-        providerOptions: params.providerOptions,
       })
     }
 
@@ -59,7 +57,6 @@ export async function streamText(
       signal: controller.signal,
       onResultChange,
       tools: params.webBrowsing ? { web_search: webSearchTool } : undefined,
-      providerOptions: params.providerOptions,
     })
 
     return result

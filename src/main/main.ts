@@ -13,9 +13,9 @@ import log from 'electron-log/main'
 import { autoUpdater } from 'electron-updater'
 import os from 'os'
 import path from 'path'
+// import { AppUpdater } from './app-updater'
 import { ShortcutSetting } from 'src/shared/types'
 import * as analystic from './analystic-node'
-import { AppUpdater } from './app-updater'
 import * as autoLauncher from './autoLauncher'
 import { parseFile } from './file-parser'
 import Locale from './locales'
@@ -32,11 +32,20 @@ import {
 } from './store-node'
 import { resolveHtmlPath } from './util'
 import * as windowState from './window_state'
-import * as analystic from './analystic-node'
-import * as autoLauncher from './autoLauncher'
-import { ShortcutSetting } from 'src/shared/types'
-import { parseFile } from './file-parser'
+// import * as analystic from './analystic-node'
+// import * as autoLauncher from './autoLauncher'
+// import { ShortcutSetting } from 'src/shared/types'
+// import { parseFile } from './file-parser'
 // import { readability } from './readability'
+
+// 检测是否为便携式版本  
+// const isPortable = process.env.PORTABLE_EXECUTABLE_DIR !== undefined  
+// const userDataPath = isPortable   
+//   ? path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'data')  
+//   : app.getPath('userData')  
+  
+// app.setPath('userData', userDataPath)
+
 
 // 这行代码是解决 Windows 通知的标题和图标不正确的问题，标题会错误显示成 electron.app.Chatbox
 // 参考：https://stackoverflow.com/questions/65859634/notification-from-electron-shows-electron-app-electron
@@ -161,7 +170,7 @@ function createTray() {
       accelerator: 'Command+Q',
     },
   ])
-  tray.setToolTip('Chatbox')
+  //tray.setToolTip('Chatbox')
   tray.setContextMenu(contextMenu)
   tray.on('double-click', showOrHideWindow)
   return tray

@@ -151,14 +151,6 @@ function SidebarButtons(props: { sessionListRef: React.RefObject<HTMLDivElement>
             <span className="opacity-0 h-0">{t('New Images')}</span>
           </span>
         </Button>
-
-        <Button variant="outlined" className="w-full gap-2 " size="large" onClick={handleCreateNewPictureSession}>
-          <AddPhotoAlternateIcon fontSize="small" />
-          <span className="flex flex-col normal-case">
-            <span className="opacity-0 h-0">{t('new chat')}</span>
-            <span>{t('New Images')}</span>
-          </span>
-        </Button>
       </Box>
 
       {/* <MenuItem onClick={handleCreateNewSession} sx={{ padding: '0.2rem 0.1rem', margin: '0.1rem' }}>
@@ -205,13 +197,11 @@ function SidebarButtons(props: { sessionListRef: React.RefObject<HTMLDivElement>
       <MenuItem
         onClick={() => {
           // setOpenSettingDialog('ai')
-          if (!routerState.location.pathname.startsWith('/settings')) {
-            navigate({
-              to: '/settings',
-            })
-          }
+          navigate({
+            to: '/settings',
+          })
         }}
-        selected={routerState.location.pathname.startsWith('/settings')}
+        selected={routerState.location.pathname === '/settings'}
         sx={{ padding: '0.2rem 0.1rem', margin: '0.1rem' }}
       >
         <ListItemIcon>
@@ -226,11 +216,7 @@ function SidebarButtons(props: { sessionListRef: React.RefObject<HTMLDivElement>
       </MenuItem>
 
       <MenuItem
-        onClick={() => {
-          navigate({
-            to: '/about',
-          })
-        }}
+        onClick={() => {}}
         selected={routerState.location.pathname === '/about'}
         sx={{ padding: '0.2rem 0.1rem', margin: '0.1rem' }}
       >

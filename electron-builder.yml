@@ -1,4 +1,4 @@
-productName: Chatbox
+productName: UChat
 appId: xyz.chatboxapp.app
 asar: true
 asarUnpack: "**\\*.{node,dll}"
@@ -15,11 +15,15 @@ afterSign: .erb/scripts/notarize.js
 mac:
   notarize: false
   category: public.app-category.developer-tools
-  target:
-    target: default
-    arch:
-      - arm64
-      - x64
+  target:  
+    - target: default  
+      arch:  
+        - arm64  
+        - x64  
+    - target: zip
+      arch:  
+        - arm64  
+        - x64
   type: distribution
   hardenedRuntime: true
   entitlements: assets/entitlements.mac.plist
@@ -41,9 +45,13 @@ win:
       arch:
         - x64
         - arm64
+    - target: portable  
+      arch:  
+        - x64  
+        - arm64
   verifyUpdateCodeSignature: false
   artifactName: ${productName}-${version}-Setup.${ext}
-  sign: ./custom_win_sign.js
+  # sign: ./custom_win_sign.js
   signingHashAlgorithms:
     - sha256
 
@@ -77,4 +85,4 @@ publish:
     bucket: chatbox
     endpoint: https://208624959c9d215edea0720162a740c1.r2.cloudflarestorage.com
     path: /releases
-    channel: ${env.UPDATE_CHANNEL} 
+    channel: stable

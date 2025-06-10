@@ -1,10 +1,14 @@
 import { ToolSet } from 'ai'
-import { Message, MessageContentParts, ProviderOptions, StreamTextResult } from 'src/shared/types'
+import { Message, MessageContentParts, StreamTextResult } from 'src/shared/types'
+
+export interface ModelHelpers {
+  isModelSupportVision(model: string): boolean
+  isModelSupportToolUse(model: string): boolean
+}
 
 export interface ModelInterface {
   name: string
-  isSupportVision(): boolean
-  isSupportToolUse(scope?: 'web-browsing'): boolean
+  isSupportToolUse(): boolean
   isSupportSystemMessage(): boolean
   chat: (messages: Message[], options: CallChatCompletionOptions) => Promise<StreamTextResult>
   paint: (prompt: string, num: number, callback?: (picBase64: string) => any, signal?: AbortSignal) => Promise<string[]>
@@ -14,7 +18,6 @@ export interface CallChatCompletionOptions<Tools extends ToolSet = ToolSet> {
   signal?: AbortSignal
   onResultChange?: onResultChange
   tools?: Tools
-  providerOptions?: ProviderOptions
 }
 
 export interface ResultChange {

@@ -40,11 +40,11 @@ function keyboardShortcut(e: KeyboardEvent, navigate?: NavigationCallback) {
 
   const ctrlKey = getOS() === 'Mac' ? e.metaKey : e.ctrlKey
 
-  if (e.key === 'i' && ctrlKey) {
+  if (e.code === 'KeyI' && ctrlKey) {
     dom.focusMessageInput()
     return
   }
-  if (e.key === 'e' && ctrlKey) {
+  if (e.code === 'KeyE' && ctrlKey) {
     dom.focusMessageInput()
     const store = getDefaultStore()
     store.set(atoms.inputBoxWebBrowsingModeAtom, (v) => !v)
@@ -52,22 +52,22 @@ function keyboardShortcut(e: KeyboardEvent, navigate?: NavigationCallback) {
   }
 
   // 创建新会话 CmdOrCtrl + N
-  if (e.key === 'n' && ctrlKey && !shift) {
+  if (e.code === 'KeyN' && ctrlKey && !shift) {
     sessionActions.createEmpty('chat')
     return
   }
   // 创建新图片会话 CmdOrCtrl + Shift + N
-  if (e.key === 'n' && ctrlKey && shift) {
+  if (e.code === 'KeyN' && ctrlKey && shift) {
     sessionActions.createEmpty('picture')
     return
   }
   // 归档当前会话的上下文。
-  // if (e.key === 'r' && altOrOption) {
+  // if (e.code === 'KeyR' && altOrOption) {
   //     e.preventDefault()
   //     sessionActions.startNewThread()
   //     return
   // }
-  if (e.key === 'r' && ctrlKey) {
+  if (e.code === 'KeyR' && ctrlKey) {
     e.preventDefault()
     sessionActions.startNewThread()
     return
@@ -85,7 +85,7 @@ function keyboardShortcut(e: KeyboardEvent, navigate?: NavigationCallback) {
     }
   }
 
-  if (e.key === 'k' && ctrlKey) {
+  if (e.code === 'KeyK' && ctrlKey) {
     const store = getDefaultStore()
     const openSearchDialog = store.get(atoms.openSearchDialogAtom)
     if (openSearchDialog) {
@@ -94,7 +94,7 @@ function keyboardShortcut(e: KeyboardEvent, navigate?: NavigationCallback) {
       store.set(atoms.openSearchDialogAtom, true)
     }
   }
-  if (e.key === ',' && e.metaKey && navigate) {
+  if (e.code === 'Comma' && e.metaKey && navigate) {
     e.preventDefault()
     navigate('/settings')
     return

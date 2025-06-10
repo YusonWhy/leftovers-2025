@@ -46,16 +46,9 @@ export default function MessageErrTips(props: { msg: Message }) {
               className="cursor-pointer underline font-bold hover:text-blue-600 transition-colors"
               onClick={() => {
                 setOpenSettingDialogAtom('ai')
-                navigate(
-                  msg.aiProvider
-                    ? {
-                        to: '/settings/provider/$providerId',
-                        params: { providerId: msg.aiProvider },
-                      }
-                    : {
-                        to: '/settings/provider',
-                      }
-                )
+                navigate({
+                  to: '/settings',
+                })
               }}
             />
           ),

@@ -174,7 +174,7 @@ function Copilots() {
           values={[
             {
               value: 'chatbox-featured',
-              label: t('Chatbox Featured'),
+              label: t('Featured Copilots'),
             },
           ]}
           currentValue="chatbox-featured"
@@ -455,15 +455,15 @@ function CopilotForm(props: CopilotFormProps) {
         value={copilotEdit.picUrl}
         onChange={inputHandler('picUrl')}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <FormGroup row>
+      <Box sx={{ textAlign: 'right', justifyContent: 'space-between' }}>
+        {/* <FormGroup row>
           <FormControlLabel
             control={<Switch />}
             label={t('Share with Chatbox')}
             checked={copilotEdit.shared}
             onChange={(e, checked) => setCopilotEdit({ ...copilotEdit, shared: checked })}
           />
-        </FormGroup>
+        </FormGroup> */}
         <ButtonGroup>
           <Button variant="outlined" onClick={() => props.close()}>
             {t('cancel')}
@@ -486,6 +486,6 @@ export async function getEmptyCopilot(): Promise<CopilotDetail> {
     prompt: '',
     starred: false,
     usedCount: 0,
-    shared: true,
+    shared: false,
   }
 }

@@ -78,7 +78,7 @@ export function getThemeDesign(realTheme: 'light' | 'dark', fontSize: number, la
             fontFamily: 'Cairo, Arial, sans-serif',
           }
         : {}),
-      fontSize: (fontSize * 14) / 16,
+      fontSize,
     },
     direction: language === 'ar' ? 'rtl' : 'ltr',
   }

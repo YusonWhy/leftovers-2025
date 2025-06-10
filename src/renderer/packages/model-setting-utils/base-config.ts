@@ -1,48 +1,28 @@
-import { ModelOptionGroup, ModelProvider, ProviderSettings, SessionType } from '../../../shared/types'
+import { ModelOptionGroup, ModelSettings, Settings } from '../../../shared/types'
 import * as Sentry from '@sentry/react'
 import * as remote from '../../packages/remote'
-import { ModelSettingUtil } from './interface'
 
-export default abstract class BaseConfig implements ModelSettingUtil {
-  public abstract provider: ModelProvider
-  public abstract getCurrentModelDisplayName(
-    model: string,
-    sessionType: SessionType,
-    providerSettings?: ProviderSettings
-  ): Promise<string>
-
-  protected abstract listProviderModels(settings: ProviderSettings): Promise<string[]>
-
-  private listRemoteProviderModels(): Promise<string[]> {
-    return remote
-      .getModelConfigsWithCache({
-        aiProvider: this.provider,
-      })
-      .then((res) => {
-        return res.option_groups
-          .map((group) => group.options)
-          .flat()
-          .map((o) => o.value)
-      })
-  }
+export default abstract class BaseConfig {
+  public abstract getLocalOptionGroups(settings: ModelSettings): ModelOptionGroup[]
+  protected abstract listProviderModels(settings: ModelSettings): Promise<string[]>
+  public abstract isCurrentModelSupportImageInput(settings: ModelSettings): boolean
+  public abstract isCurrentModelSupportToolUse(settings: ModelSettings): boolean
 
   // 有三个来源：本地写死、后端配置、服务商模型列表
-  public async getMergeOptionGroups(providerSettings: ProviderSettings): Promise<ModelOptionGroup[]> {
-    const localOptionGroups = (providerSettings.models || []).map((model) => ({
-      options: [{ label: model.nickname || model.modelId, value: model.modelId }],
-    }))
-    const [remoteModels, models] = await Promise.all([
-      this.listRemoteProviderModels().catch((e) => {
+  public async getMergeOptionGroups(settings: ModelSettings): Promise<ModelOptionGroup[]> {
+    const localOptionGroups = this.getLocalOptionGroups(settings)
+    const [modelConfigs, models] = await Promise.all([
+      remote.getModelConfigsWithCache(settings).catch((e) => {
         Sentry.captureException(e)
-        return []
+        return { option_groups: [] as ModelOptionGroup[] }
       }),
-      this.listProviderModels(providerSettings).catch((e) => {
+      this.listProviderModels(settings).catch((e) => {
         Sentry.captureException(e)
         return []
       }),
     ])
     const remoteOptionGroups = [
-      ...remoteModels.map((model) => ({ options: [{ label: model, value: model }] })),
+      ...modelConfigs.option_groups,
       ...models.map((model) => ({ options: [{ label: model, value: model }] })),
     ]
     return this.mergeOptionGroups(localOptionGroups, remoteOptionGroups)
@@ -66,5 +46,9 @@ export default abstract class BaseConfig implements ModelSettingUtil {
       })
     }
     return ret.filter((group) => group.options.length > 0)
+  }
+
+  getCurrentModelOptionValue(settings: Settings) {
+    return ''
   }
 }

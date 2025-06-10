@@ -1,25 +1,4 @@
 const changelog = `
-### v1.13.3 - 2025.06.08
-
-1. Fixed issue where custom provider couldn't set API Path
-2. OpenAI, Claude, Gemini models support setting thinking effort parameter
-
-### v1.13.2 - 2025.05.30
-
-1. Fixed window can't be dragged on session title bar
-
-### v1.13.1 - 2025.05.28
-
-1. Refactor settings UI
-2. Quick switch to different model provider in chat session
-3. Fix a bug in moving thread to session
-4. Fix a bug in conversation search
-5. Fix a bug in auto scroll issue
-6. Optimize window height calculation performance, improve mobile keyboard pop-up speed
-7. Fix some style issues on small screen
-
-Thanks to @xiaoxiaowesley, @chaoliu719, @Jesse205, @trrahul for their contributions
-
 ### v1.12.3 - 2025.05.08
 
 1. Fixed issue where data was lost when upgrading from 1.9.x version on mobile

@@ -1,9 +1,9 @@
 import { createPerplexity } from '@ai-sdk/perplexity'
 import { extractReasoningMiddleware, wrapLanguageModel } from 'ai'
 import AbstractAISDKModel from './abstract-ai-sdk'
-import { ProviderModelInfo } from 'src/shared/types'
+import { ModelHelpers } from './types'
 
-const helpers = {
+const helpers: ModelHelpers = {
   isModelSupportVision: (model: string) => {
     return false
   },
@@ -14,16 +14,17 @@ const helpers = {
 
 interface Options {
   perplexityApiKey: string
-  model: ProviderModelInfo
+  perplexityModel: string
   temperature?: number
   topP?: number
 }
 
 export default class Perplexity extends AbstractAISDKModel {
   public name = 'Perplexity API'
+  public static helpers = helpers
 
   constructor(public options: Options) {
-    super(options)
+    super()
   }
 
   protected getChatModel() {
@@ -31,9 +32,13 @@ export default class Perplexity extends AbstractAISDKModel {
       apiKey: this.options.perplexityApiKey,
     })
     return wrapLanguageModel({
-      model: provider.languageModel(this.options.model.modelId),
+      model: provider.languageModel(this.options.perplexityModel),
       middleware: extractReasoningMiddleware({ tagName: 'think' }),
     })
+  }
+
+  isSupportToolUse() {
+    return helpers.isModelSupportToolUse(this.options.perplexityModel)
   }
 }
 
