@@ -39,9 +39,9 @@
     "mobile:android": "npm run mobile:sync:android && npx cap open android",
     "mobile:assets": "npx capacitor-assets generate --ios --android",
     "prepare": "husky",
-    "package:portable:win": "npm run build && electron-builder --win portable",  
-    "package:portable:mac": "npm run build && electron-builder --mac zip",  
-    "package:portable:all": "npm run build && electron-builder --win portable --mac zip" 
+    "package:portable:win": "npm run build && electron-builder --win portable",
+    "package:portable:mac": "npm run build && electron-builder --mac zip",
+    "package:portable:all": "npm run build && electron-builder --win portable --mac zip"
   },
   "repository": {
     "type": "git",
@@ -66,6 +66,7 @@
     "@testing-library/react": "^14.0.0",
     "@types/auto-launch": "^5.0.5",
     "@types/autosize": "^4.0.3",
+    "@types/crypto-js": "^4.2.2",
     "@types/d3": "^7.4.3",
     "@types/gtag.js": "^0.0.13",
     "@types/highlight.js": "^10.1.0",
@@ -180,7 +181,6 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/crypto-js": "^4.2.2",
     "ai": "^4.3.6",
     "auto-launch": "^5.0.6",
     "autosize": "^6.0.1",
